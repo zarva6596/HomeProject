@@ -29,7 +29,7 @@
             </table>
 
             <div class="weather__error" v-else>
-                I'm sorry, but I don't know, maybe you'll try later
+                I'm sorry but this city isn't exist
             </div>
         </div>
     </div>
@@ -62,7 +62,8 @@ export default {
         getWeather() {
             const key = process.env.VUE_APP_WEATHER;
 
-            this.axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${this.city}&appid=${key}`)
+            if (this.city.length) {
+                this.axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${this.city}&appid=${key}`)
                 .then(res => res.data)
                 .then(data => {
                     this.weather = {
@@ -72,7 +73,11 @@ export default {
                         pressure: data.main.pressure,
                         sky: data.weather[0].main
                     }
-                });
+                })
+                .catch(() => this.weather = {});
+            } else {
+                this.weather = {}
+            }
         },
     }
 }
