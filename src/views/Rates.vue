@@ -50,7 +50,7 @@ export default {
 
   methods: {
     getBase(currency) {
-      if (this.rates['UAH']) {
+      if (this.rates['UAH'] && this.rates[currency]) {
         return (this.rates['UAH'] / this.rates[currency]).toFixed(2);
       }
 
