@@ -39,18 +39,22 @@ export default {
     Header,
   },
 
-  async mounted() {
+  mounted() {
     const key = process.env.VUE_APP_FIXER;
-    const res = await fetch(
-      `http://data.fixer.io/api/latest?access_key=${key}&symbols=UAH,USD,EUR,PLN,RUB`
-    );
-    this.rates = (await res.json()).rates;
-    console.log(this.rates)
+
+    this.axios
+      .get(`http://data.fixer.io/api/latest?access_key=${key}&symbols=UAH,USD,EUR,PLN,RUB`)
+      .then(response => response.data)
+      .then(data => this.rates = data.rates)
   },
 
   methods: {
     getBase(currency) {
-      return (this.rates['UAH'] / this.rates[currency]).toFixed(2);
+      if (this.rates['UAH']) {
+        return (this.rates['UAH'] / this.rates[currency]).toFixed(2);
+      }
+
+      return 'Please try again later'
     }
   }
 };
