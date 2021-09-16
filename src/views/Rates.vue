@@ -2,10 +2,10 @@
   <div>
     <Header />
 
-    <div class="rates">
+    <div class="page rates">
       <h1 class="rates__heading">Exchange rates</h1>
 
-      <p class="rates__paragraph">
+      <p class="page__paragraph rates__paragraph">
         The values in the table are presented in relation to the Ukrainian hryvnia
       </p>
 
@@ -61,15 +61,9 @@ export default {
 </script>
 
 <style lang="scss">
+@import '@/styles/page';
+
 .rates {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 30px;
-
-  &__paragraph {
-      margin-top: 30px;
-  }
-
   &__list {
     margin: 30px auto;
     width: fit-content;
