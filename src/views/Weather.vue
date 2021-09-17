@@ -31,6 +31,26 @@
             <div class="weather__error" v-else>
                 I'm sorry but this city isn't exist
             </div>
+
+            <form v-if="!isEmpty && !errorSend" class="weather__form" @submit.prevent="postTelegram()">
+                <button
+                    class="weather__send"
+                    type="submit"
+                    :class="{
+                        'weather__send--sending': sendDone && !errorSend,
+                    }"
+                    :disabled="sendDone && !errorSend"
+                >
+                    {{ sendDone && !errorSend ? 'Messege send' : 'Send to telegram'}}
+                </button>
+            </form>
+
+            <div 
+                v-else-if="errorSend"
+                class="weather__send--error"
+            >
+                Sorry something went wrong.
+            </div>
         </div>
     </div>
 </template>
@@ -41,7 +61,10 @@ import Header from '@/components/Header.vue'
 export default {
     data: () => ({
         weather: {},
-        city: 'lviv'
+        city: 'lviv',
+        botId: '-1001428005227',
+        errorSend: false,
+        sendDone: false
     }),
 
     components: {
@@ -69,8 +92,8 @@ export default {
                     this.weather = {
                         city: data.name,
                         temp: `${(data.main.temp - 273.15).toFixed(2)}°c`,
-                        humidity: data.main.humidity,
-                        pressure: data.main.pressure,
+                        humidity: `${data.main.humidity}%`,
+                        pressure: `${data.main.pressure} hPa`,
                         sky: data.weather[0].main
                     }
                 })
@@ -79,6 +102,23 @@ export default {
                 this.weather = {}
             }
         },
+
+        async postTelegram() {
+            const key = process.env.VUE_APP_TELEGRAM;
+            const message = `Hello, in ${this.weather.city} now the air temperature is ${this.weather.temp}, humidity is ${this.weather.humidity}, the sky is ${(this.weather.sky).toLowerCase()}, the pressure is ${this.weather.pressure}.`
+            
+            try {
+                await this.axios.post(`https://api.telegram.org/bot${key}/sendMessage?chat_id=${this.botId}&text=${message}`);
+                this.sendDone = true;
+            } catch(e) {
+                this.errorSend = true;
+            }
+            
+            setTimeout(() => {
+                this.sendDone = false;
+                this.errorSend = false;
+            }, 3000);
+        }
     }
 }
 </script>
@@ -126,6 +166,20 @@ export default {
                 font-size: 18px;
                 transition: all .5s;
 
+                &.weather__send {
+                    border-radius: 10px;
+
+                    &--sending {
+                        background-color: #009688;
+                        border-color: #009688;
+
+                        &:hover {
+                            background-color: #009688;
+                            border-color: #009688;
+                        }
+                    }
+                }
+
                 &:hover {
                     cursor: pointer;
                     border-color: #33691E;
@@ -133,6 +187,11 @@ export default {
                     color: #eee;
                 }
             }
+        }
+
+        &__send--error {
+            text-align: center;
+            font-size: 30px;
         }
     }
 </style>
