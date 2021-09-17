@@ -60,7 +60,6 @@ import Header from '@/components/Header.vue'
 
 export default {
     data: () => ({
-        weather: {},
         city: 'lviv',
         botId: '-1001428005227',
         errorSend: false,
@@ -75,39 +74,35 @@ export default {
         isEmpty() {
             return !Object.keys(this.weather).length;
         },
+
+        weather() {
+            const baseWeather = this.$store.getters.getNewWethersInfo;
+            return Object.keys(baseWeather).length 
+                ? {
+                    country: baseWeather.sys.country,
+                    city: baseWeather.name,
+                    temp: `${(baseWeather.main.temp - 273.15).toFixed(2)}°С`,
+                    humidity: `${baseWeather.main.humidity}%`,
+                    pressure: `${baseWeather.main.pressure} hPa`,
+                    sky: `${baseWeather.weather[0].main}`
+                } : {}
+        }
     },
-    
-    mounted() {
-        this.getWeather();
+
+    beforeMount() {
+        this.$store.dispatch('getWeather', this.city)
     },
 
     methods: {
-        getWeather() {
-            const key = process.env.VUE_APP_WEATHER;
-
-            if (this.city.length) {
-                this.axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${this.city}&appid=${key}`)
-                .then(res => res.data)
-                .then(data => {
-                    this.weather = {
-                        city: data.name,
-                        temp: `${(data.main.temp - 273.15).toFixed(2)}°c`,
-                        humidity: `${data.main.humidity}%`,
-                        pressure: `${data.main.pressure} hPa`,
-                        sky: data.weather[0].main
-                    }
-                })
-                .catch(() => this.weather = {});
-            } else {
-                this.weather = {}
-            }
+        async getWeather() {
+            this.city.length && await this.$store.dispatch('getWeather', this.city)
         },
 
         postTelegram() {
             const key = process.env.VUE_APP_TELEGRAM;
             const message = `Hello, in ${this.weather.city} now the air temperature is ${this.weather.temp}, humidity is ${this.weather.humidity}, the sky is ${(this.weather.sky).toLowerCase()}, the pressure is ${this.weather.pressure}.`
-            
-            this.axios.post(`https://api.telegram.org/bot${key}/sendMessage?chat_id=${this.botId}&text=${message}`)
+            const api = process.env.VUE_APP_TELEGRAM_API
+            this.axios.post(`${api}/bot${key}/sendMessage?chat_id=${this.botId}&text=${message}`)
                 .then(() => this.sendDone = true)
                 .catch(() => this.errorSend = true)
             

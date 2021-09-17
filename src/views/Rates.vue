@@ -39,13 +39,8 @@ export default {
     Header,
   },
 
-  mounted() {
-    const key = process.env.VUE_APP_FIXER;
-
-    this.axios
-      .get(`http://data.fixer.io/api/latest?access_key=${key}&symbols=UAH,USD,EUR,PLN,RUB`)
-      .then(response => response.data)
-      .then(data => this.rates = data.rates)
+  async mounted() {
+    this.rates = await this.$store.dispatch('getRates')
   },
 
   methods: {
