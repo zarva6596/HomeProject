@@ -103,16 +103,13 @@ export default {
             }
         },
 
-        async postTelegram() {
+        postTelegram() {
             const key = process.env.VUE_APP_TELEGRAM;
             const message = `Hello, in ${this.weather.city} now the air temperature is ${this.weather.temp}, humidity is ${this.weather.humidity}, the sky is ${(this.weather.sky).toLowerCase()}, the pressure is ${this.weather.pressure}.`
             
-            try {
-                await this.axios.post(`https://api.telegram.org/bot${key}/sendMessage?chat_id=${this.botId}&text=${message}`);
-                this.sendDone = true;
-            } catch(e) {
-                this.errorSend = true;
-            }
+            this.axios.post(`https://api.telegram.org/bot${key}/sendMessage?chat_id=${this.botId}&text=${message}`)
+                .then(() => this.sendDone = true)
+                .catch(() => this.errorSend = true)
             
             setTimeout(() => {
                 this.sendDone = false;
